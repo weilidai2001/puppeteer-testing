@@ -1,14 +1,13 @@
 const puppeteer = require('puppeteer');
 
-const PAGE_LOAD_TIMEOUT = 4000;
-
 let browser;
 let page;
 
 describe('Gumtree()', () => {
     beforeAll(async () => {
         browser = await puppeteer.launch({
-            headless: false,
+            headless: true,
+            slowMo: 0,
         });
     });
 
@@ -36,11 +35,9 @@ describe('Gumtree()', () => {
                 }
             });
 
-            try {
-                await page.goto('https://www.gumtree.com/for-sale', {timeout: PAGE_LOAD_TIMEOUT});
-            } catch (e) {}
+            await page.goto('https://www.gumtree.com/for-sale', {waitUntil: 'domcontentloaded'});
             expect(isAdSenseCalled).toBe(true);
-        }, 10000);
+        });
 
         test('call AdSense server', async () => {
             await page.setRequestInterception(true);
@@ -57,9 +54,7 @@ describe('Gumtree()', () => {
                 }
             });
 
-            try {
-                await page.goto('https://www.gumtree.com/for-sale', {timeout: PAGE_LOAD_TIMEOUT});
-            } catch (e) {}
+            await page.goto('https://www.gumtree.com/for-sale', {waitUntil: 'domcontentloaded'});
 
             expect(isAdSenseCalled).toBe(true);
         }, 20000);
@@ -71,18 +66,14 @@ describe('Gumtree()', () => {
         });
 
         test('prebid version on homepage', async () => {
-            try {
-                await page.goto('https://www.gumtree.com/', {timeout: PAGE_LOAD_TIMEOUT});
-            } catch (e) {}
+            await page.goto('https://www.gumtree.com/', {waitUntil: 'domcontentloaded'});
 
             const prebidVersion = await page.evaluate(`pbjs.version`);
             expect(prebidVersion).toBe('v1.14.0');
         });
 
         test('prebid version on for-sale page', async () => {
-            try {
-                await page.goto('https://www.gumtree.com/for-sale', {timeout: PAGE_LOAD_TIMEOUT});
-            } catch (e) {}
+            await page.goto('https://www.gumtree.com/for-sale', {waitUntil: 'domcontentloaded'});
             const prebidVersion = await page.evaluate(`pbjs.version`);
             expect(prebidVersion).toBe('v1.14.0');
         }, 10000);
